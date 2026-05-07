@@ -24,6 +24,10 @@ class ToolParams:
             raise KeyError(f"Required parameter '{key}' is missing from tool input")
         return self.raw[key]
 
+    def keys(self) -> list[str]:
+        """Return a list of all parameter keys. Handy for debugging."""
+        return list(self.raw.keys())
+
 
 @dataclass
 class ToolResult:
@@ -91,22 +95,14 @@ class BaseTool(ABC):
 
     # ------------------------------------------------------------------ helpers
 
-    def __call__(self, raw_input: dict[str, Any]) -> ToolResult:
-        """Convenience wrapper: extract params then run."""
-        if not self.is_available():
-            return ToolResult.fail(
-                f"Tool '{self.my_tool_name}' is not available in this environment"
-            )
+    def safe_run(self, raw_input: dict[str, Any]) -> ToolResult:
+        """Convenience method: extract params and run in one call.
+
+        Catches ValueError from extract_params and returns a ToolResult.fail
+        so callers don't have to handle the two-step manually.
+        """
         try:
             params = self.extract_params(raw_input)
-        except (ValueError, KeyError) as exc:
+        except (KeyError, ValueError) as exc:
             return ToolResult.fail(f"Parameter error: {exc}")
         return self.run(params)
-
-    def __repr__(self) -> str:
-        available = self.is_available()
-        return (
-            f"<{self.__class__.__name__} "
-            f"name={self.my_tool_name!r} "
-            f"available={available}>"
-        )
