@@ -28,6 +28,10 @@ class ToolParams:
         """Return a list of all parameter keys. Handy for debugging."""
         return list(self.raw.keys())
 
+    def has(self, key: str) -> bool:
+        """Return True if *key* is present in the parameters. Convenience wrapper."""
+        return key in self.raw
+
 
 @dataclass
 class ToolResult:
@@ -90,19 +94,5 @@ class BaseTool(ABC):
         """Execute the tool with the given *params*.
 
         Should never raise – catch exceptions internally and return
-        ``ToolResult.fail(...)`` instead.
+        ``ToolResult.fail(str(exc))`` so callers always get a structured result.
         """
-
-    # ------------------------------------------------------------------ helpers
-
-    def safe_run(self, raw_input: dict[str, Any]) -> ToolResult:
-        """Convenience method: extract params and run in one call.
-
-        Catches ValueError from extract_params and returns a ToolResult.fail
-        so callers don't have to handle the two-step manually.
-        """
-        try:
-            params = self.extract_params(raw_input)
-        except (KeyError, ValueError) as exc:
-            return ToolResult.fail(f"Parameter error: {exc}")
-        return self.run(params)
