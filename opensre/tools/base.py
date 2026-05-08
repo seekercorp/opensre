@@ -32,6 +32,10 @@ class ToolParams:
         """Return True if *key* is present in the parameters. Convenience wrapper."""
         return key in self.raw
 
+    def to_dict(self) -> dict[str, Any]:
+        """Return a shallow copy of the underlying raw dict. Useful for logging/serialisation."""
+        return dict(self.raw)
+
 
 @dataclass
 class ToolResult:
@@ -91,8 +95,4 @@ class BaseTool(ABC):
 
     @abstractmethod
     def run(self, params: ToolParams) -> ToolResult:
-        """Execute the tool with the given *params*.
-
-        Should never raise – catch exceptions internally and return
-        ``ToolResult.fail(str(exc))`` so callers always get a structured result.
-        """
+        """Execute the tool with *params* and return a ToolResult."""
