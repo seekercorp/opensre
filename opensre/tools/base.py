@@ -55,6 +55,14 @@ class ToolResult:
     def fail(cls, error: str) -> "ToolResult":
         return cls(success=False, error=error)
 
+    def __bool__(self) -> bool:
+        """Allow truth-testing a ToolResult directly, e.g. ``if result: ...``.
+
+        # NOTE: added this because I kept writing ``if result.success:`` everywhere
+        # and the shorter form reads more naturally to me.
+        """
+        return self.success
+
 
 class BaseTool(ABC):
     """Abstract base class every opensre tool must implement.
@@ -88,11 +96,4 @@ class BaseTool(ABC):
     def extract_params(self, raw_input: dict[str, Any]) -> ToolParams:
         """Validate *raw_input* and return a populated ToolParams instance.
 
-        Raise ``ValueError`` with a descriptive message if validation fails.
-        """
-
-    # --------------------------------------------------------------- execution
-
-    @abstractmethod
-    def run(self, params: ToolParams) -> ToolResult:
-        """Execute the tool with *params* and return a ToolResult."""
+        Raise ``ValueError`` with a
