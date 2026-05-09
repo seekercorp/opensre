@@ -63,6 +63,16 @@ class ToolResult:
         """
         return self.success
 
+    def unwrap(self) -> Any:
+        """Return output if successful, otherwise raise RuntimeError with the error message.
+
+        # NOTE: handy shortcut inspired by Rust's Result::unwrap — saves me from
+        # manually checking result.success before accessing result.output.
+        """
+        if not self.success:
+            raise RuntimeError(f"Tool failed: {self.error}")
+        return self.output
+
 
 class BaseTool(ABC):
     """Abstract base class every opensre tool must implement.
@@ -88,12 +98,4 @@ class BaseTool(ABC):
 
     @abstractmethod
     def is_available(self) -> bool:
-        """Return True if this tool's dependencies are satisfied."""
-
-    # ---------------------------------------------------------- parameter layer
-
-    @abstractmethod
-    def extract_params(self, raw_input: dict[str, Any]) -> ToolParams:
-        """Validate *raw_input* and return a populated ToolParams instance.
-
-        Raise ``ValueError`` with a
+        """Return True if this tool's dependencies are sati
